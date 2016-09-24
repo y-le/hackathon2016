@@ -20,9 +20,9 @@
 <div id="sidebar-wrapper">
 	<div id="coords"><label for="usr">Twoja lokalizacja:</label><br/>
         <label for="latLoc">Szerokość</label>
-		<input type="number" class="form-control" id="latLoc" value="52.259"/>
+		<input type="number" class="form-control" id="latLoc" value="54.21145178746455"/>
         <label for="lenLoc">Długość</label>
-        <input type="number" class="form-control" id="lenLoc" value="21.020"/>
+        <input type="number" class="form-control" id="lenLoc" value="22.055740356445312"/>
 		<button type="button" class="btn btn-default" id="localization-button">Szukaj</button>
 	</div>
 	<div class="panel panel-default">
@@ -30,39 +30,48 @@
 	  <div class="panel-heading">Jakis tekst o wiochach</div>
 
 	  <!-- Table -->
-	  <table class="table">
+	  <table class="table" id="tabelaWiosek">
+	  <tr><td>Nazwa miejscowości</td><td>Odległość</td><td>Liczba mieszkańców</td></tr>
 		
 	  </table>
 	</div>
 </div>
 <div id="map"></div>
-
-
+<h2>Dostępne przyłącza</h2>
+<div class="row" id = "table2">
+</div>
 
 
 </div>
 
 <script>
+
   var map;
   var myLocationMarker = undefined;
   var markers = [];
   var communicationNodes = [{lat: 52.2, lng: 21.1}, {lat: 52.15, lng: 21.2}];
+  var villages = [{name: "Abc", dystansDoNas: 0, liczbaMieszkancow: 200, obszar: 2.23, lat: 54.21145178746455, lng: 22.055740356445312}]
   var radius = 10;
 
   var iconPathBase = "img/";
   var icons = {
       radiotower: {
-        icon: iconPathBase + 'radiotower.png'}
+        icon: iconPathBase + 'radiotower.png'},
+	  village: {
+	    icon: iconPathBase + 'house.png' }
     };
 
   function getInitialCoords() {
-    return {lat: 52.14, lng: 21.1};
+    return {lat: 54.21145178746455, lng: 22.055740356445312};
   }
   
   var rowId = 0;
-  function addRow(){
-	$(".table").append('<tr id=\"' + rowId + '\"' + '><td>my data' + rowId + '</td><td>more data</td></tr>');
+  function addRow(village){
+	$(".table").append('<tr id=\"' + rowId + '\"' + '><td>' + village.name + '</td><td>' + village.dystansDoNas + '</td><td>' + village.obszar + '</td></input><td style=\"display:none\">' + village.lat + '</td><td style=\"display:none\">' + village.lng + '</td></tr>');
 	$("#" + rowId ).click(function() { console.log($(this).html());});
+	var colorCopy = $("#" + rowId).css('backgroundColor');
+	$("#" + rowId).hover(function() {$(this).css({background:'red'}); });
+	$("#" + rowId).mouseleave(function() {$(this).css({background:colorCopy}); });
 	rowId = rowId + 1;
   }
 	
@@ -80,7 +89,7 @@
     communicationNodes = json; // this will show the info it in firebug console
 	console.log(communicationNodes.length);
 	
-	$(".rowek").click(function() { console.log("kurwaaa");});
+	$(".rowek").click(function() { console.log("asd");});
 });
 	
     setupListeners();
@@ -122,17 +131,28 @@
     
     updateView(coords);
   }
+  
+  /*var closestNodes = getListOfclosestNodes(communicationNodes, coords, radius);
+	
+    setMarkers(closestNodes, icons.radiotower.icon);
+    closestNodes.push(coords);
+    fitBounds(closestNodes);*/
 
   function updateView(coords){
    
     clearMarkers();
     map.setCenter(coords);
-    
-    var closestVillages = getListOfClosestVillages(communicationNodes, coords, radius);
+
+    var closestVillages = getListOfclosestNodes(villages, coords, radius);
 	
-    setMarkers(closestVillages, icons.radiotower.icon);
+    setMarkers(closestVillages, icons.village.icon);
     closestVillages.push(coords);
     fitBounds(closestVillages);
+
+	$("#tabelaWiosek").html("<tr><td>Nazwa miejscowości</td><td>Odległość</td><td>Liczba mieszkańców</td></tr>");
+	for (var i = 0; i < villages.length; ++i){
+		addRow(villages[i]);
+	}
 
     $("#latLoc").val(coords.lat);
     $("#lenLoc").val(coords.lng);
@@ -160,8 +180,6 @@
         setMyLocation(coords);
     });
 	
-	$("#localization-button").click(function(){addRow()});
-	
   } 
 
 	function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
@@ -183,7 +201,7 @@
       return deg * (Math.PI/180);
     }
 
-    function getListOfClosestVillages(list, coords, length) {
+    function getListOfclosestNodes(list, coords, length) {
       var result = [];
 
       for (i = 0; i < list.length; i++) {
