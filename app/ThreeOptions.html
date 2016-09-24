@@ -16,8 +16,9 @@
 
     <!-- build:css styles/main.css -->
     <link rel="stylesheet" href="styles/main.css">
-        <link rel="stylesheet" href="styles/ThreeOptions.css">
     <!-- endbuild -->
+    
+    <link rel="stylesheet" href="styles/ThreeOptions.css">
 
     <!-- build:js scripts/vendor/modernizr.js -->
     <script src="/bower_components/modernizr/modernizr.js"></script>
@@ -34,21 +35,24 @@
     			<div class="col-xs-6 col-sm-6 col-md-4 col-lg-4">
 				
 					<!-- PRICE ITEM -->
-					<div class="panel price panel-red">
-						<div class="panel-heading  text-center">
+					<div class="panel price panel-blue">
+						<div class="panel-heading arrow_box text-center">
 						<h3>LAJT</h3>
 						</div>
 						<div class="panel-body text-center">
-							<p class="lead" style="font-size:40px"><strong>$10 / month</strong></p>
+                            <p class="lead" style="font-size:22px">diagram kołowy</p>
 						</div>
 						<ul class="list-group list-group-flush text-center">
-							<li class="list-group-item"><i class="icon-ok text-danger"></i> Personal use</li>
-							<li class="list-group-item"><i class="icon-ok text-danger"></i> Unlimited projects</li>
-							<li class="list-group-item"><i class="icon-ok text-danger"></i> 27/7 support</li>
+							<li class="list-group-item"><i class="icon-ok text-info"></i> 1000 metrów kabla</li>
+							<li class="list-group-item"><i class="icon-ok text-info"></i> Unlimited projects</li>
+							<li class="list-group-item"><i class="icon-ok text-info"></i> 27/7 support</li>
 						</ul>
 						<div class="panel-footer">
-							<a class="btn btn-lg btn-block btn-danger" href="#">BUY NOW!</a>
+                            <div class="text-center">100 Mbps</div>
+<!--							<a class="btn btn-lg btn-block btn-info" href="#">BUY NOW!</a>-->
+							
 						</div>
+                            <a class="btn btn-lg btn-block btn-success" href="#"><strong>3700zł miesięcznie</strong></a>
 					</div>
 					<!-- /PRICE ITEM -->
 					
@@ -63,8 +67,7 @@
 						<h3>STANDARD</h3>
 						</div>
 						<div class="panel-body text-center">
-							<p class="lead" style="font-size:40px"><strong>3700zł</strong></p>
-                            <p class="lead" style="font-size:22px"><strong>100zł / klient</strong></p>
+                            <p class="lead" style="font-size:22px">diagram kołowy</p>
 						</div>
 						<ul class="list-group list-group-flush text-center">
 							<li class="list-group-item"><i class="icon-ok text-info"></i> 1000 metrów kabla</li>
@@ -74,7 +77,9 @@
 						<div class="panel-footer">
                             <div class="text-center">100 Mbps</div>
 <!--							<a class="btn btn-lg btn-block btn-info" href="#">BUY NOW!</a>-->
+							
 						</div>
+                            <a class="btn btn-lg btn-block btn-warning" href="#"><strong>3700zł miesięcznie</strong></a>
 					</div>
 					<!-- /PRICE ITEM -->
 					
@@ -84,21 +89,24 @@
 				<div class="col-xs-6 col-sm-6 col-md-4 col-lg-4">
 				
 					<!-- PRICE ITEM -->
-					<div class="panel price panel-green">
+					<div class="panel price panel-blue">
 						<div class="panel-heading arrow_box text-center">
-						<h3>BŁYSKAWICZNY</h3>
+						<h3>LAJT</h3>
 						</div>
 						<div class="panel-body text-center">
-							<p class="lead" style="font-size:40px"><strong>$0 / month</strong></p>
+                            <p class="lead" style="font-size:22px">diagram kołowy</p>
 						</div>
 						<ul class="list-group list-group-flush text-center">
-							<li class="list-group-item"><i class="icon-ok text-success"></i> Personal use</li>
-							<li class="list-group-item"><i class="icon-ok text-success"></i> Unlimited projects</li>
-							<li class="list-group-item"><i class="icon-ok text-success"></i> 27/7 support</li>
+							<li class="list-group-item"><i class="icon-ok text-info"></i> 1000 metrów kabla</li>
+							<li class="list-group-item"><i class="icon-ok text-info"></i> Unlimited projects</li>
+							<li class="list-group-item"><i class="icon-ok text-info"></i> 27/7 support</li>
 						</ul>
 						<div class="panel-footer">
-							<a class="btn btn-lg btn-block btn-success" href="#">BUY NOW!</a>
+                            <div class="text-center">100 Mbps</div>
+<!--							<a class="btn btn-lg btn-block btn-info" href="#">BUY NOW!</a>-->
+							
 						</div>
+                            <a class="btn btn-lg btn-block btn-danger" href="#"><strong>3700zł miesięcznie</strong></a>
 					</div>
 					<!-- /PRICE ITEM -->
 					
@@ -129,6 +137,10 @@
     <script src="/bower_components/jquery/dist/jquery.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
+    
+    <!-- build:js scripts/vendor/Chart.js -->
+    <script src="/bower_components/chart.js/dist/Chart.js"></script>
+    <!-- endbuild -->
 
     <!-- build:js scripts/plugins.js -->
     <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/affix.js"></script>
@@ -148,5 +160,8 @@
     <!-- build:js scripts/main.js -->
     <script src="scripts/main.js"></script>
     <!-- endbuild -->
+    
+    <script src="scripts/ThreeOptions.js"></script>
+    
   </body>
 </html>
