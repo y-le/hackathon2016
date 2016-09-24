@@ -41,7 +41,7 @@
   var myLocationMarker = undefined;
   var markers = [];
   var communicationNodes = [{lat: 52.2, lng: 21.1}, {lat: 52.15, lng: 21.2}];
-  var radius = 9;
+  var radius = 10;
 
   var iconPathBase = "img/";
   var icons = {
@@ -63,6 +63,7 @@
   }
 
   function setMarker(coords, icon){
+    //alert(coords.lat + " " + coords.lng);
     var marker = new google.maps.Marker({
       position: coords,
       map: map,
@@ -92,7 +93,7 @@
     if (myLocationMarker !== undefined){
         myLocationMarker.setMap(null);
     }
-
+    //alert(coords.lat);
     myLocationMarker = setMarker(coords);
     
     updateView(coords);
@@ -124,7 +125,7 @@
   function setupListeners(){
     //MapMouseClick
     map.addListener('click', function(event) {
-      setMyLocation(event.latLng);
+      setMyLocation({ lat: event.latLng.lat(), lng: event.latLng.lng() });
     });
 
     //SubmitLocationClicked
@@ -135,7 +136,7 @@
   } 
 
 	function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
-      /*var R = 6371; // Radius of the earth in km
+      var R = 6371; // Radius of the earth in km
       var dLat = deg2rad(lat2-lat1);  // deg2rad below
       var dLon = deg2rad(lon2-lon1); 
       var a = 
@@ -145,8 +146,8 @@
         ; 
       var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
       var d = R * c; // Distance in km
-      return d;*/
-      return 10;
+      //alert(d);
+      return d;
     }
 
     function deg2rad(deg) {
