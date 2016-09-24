@@ -34,7 +34,7 @@ with open('miejscowosci_zsumowane_dwie.csv', newline='', encoding='utf-8') as f:
         datum = {}
         datum['teryt'] = teryt
         datum['lat'] = convert(lat)
-        datum['long'] = convert(long)
+        datum['lng'] = convert(long)
         datum['name2'] = name
 
         #print(teryt + " " + lat + " " + long)
