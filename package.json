@@ -40,5 +40,8 @@
         "single"
       ]
     }
+  },
+  "dependencies": {
+    "httpdispatcher": "^1.0.0"
   }
 }
