@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/simple-sidebar.css" rel="stylesheet">
+  <style>
+    #map {
+      height: 400px;
+      width: 100%;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+</head>
+<body>
+<div id="wrapper">
+<h3>My Google Maps Demo</h3>
+<div id="sidebar-wrapper">
+	<div id="coords"><label for="usr">Twoja lokalizacja:</label><br/>
+        <label for="latLoc">Szerokość</label>
+		<input type="number" class="form-control" id="latLoc" value="52.259"/>
+        <label for="lenLoc">Długość</label>
+        <input type="number" class="form-control" id="lenLoc" value="21.020"/>
+		<button type="button" class="btn btn-default" id="localization-button">Szukaj</button>
+	</div>
+	<ul id="places">
+	<li>miejsca</li>
+	</ul>
+</div>
+<div id="map"></div>
+
+
+
+
+</div>
+
+<script>
+  var map;
+  var myLocationMarker = undefined;
+  var communicationNodes = [{lat: 52.2, lng: 21.1}, {lat: 52.15, lng: 21.2}];
+
+  var iconPathBase = "img/";
+  var icons = {
+      radiotower: {
+        icon: iconPathBase + 'radiotower.png'}
+    };
+
+  function getInitialCoords() {
+    return {lat: 52.14, lng: 21.1};
+  }
+
+  function initMap() {
+    map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 6,
+      center: getInitialCoords()
+    });
+	for (var i = 0; i < communicationNodes.length; i++){
+		setMarker(communicationNodes[i], icons.radiotower.icon);
+	}
+    setupListeners();
+  }
+
+  function setMarker(coords, icon){
+    var marker = new google.maps.Marker({
+      position: coords,
+      map: map,
+      icon: icon
+    });
+
+    return marker;
+  }
+
+  function setMyLocation(coords){
+    if (myLocationMarker !== undefined){
+        myLocationMarker.setMap(null);
+    }
+
+    myLocationMarker = setMarker(coords);
+    
+    updateView(coords);
+  }
+
+  function updateView(coords){
+    map.setCenter(coords);
+    
+    fitBounds(coords);
+    $("#latLoc").val(coords.lat);
+    $("#lenLoc").val(coords.lng);
+
+  }
+
+  function fitBounds(initialCoords){
+    var bounds = new google.maps.LatLngBounds();
+    bounds.extend(initialCoords);
+    for (var i = 0; i < communicationNodes.length; i++) {
+        bounds.extend(communicationNodes[i]);
+    }
+    map.fitBounds(bounds);
+  }
+
+  function setupListeners(){
+    //MapMouseClick
+    map.addListener('click', function(event) {
+      setMyLocation(event.latLng);
+    });
+
+    //SubmitLocationClicked
+    $("#localization-button").click(function(){
+        var coords = {lat: parseFloat($("#latLoc").val()), lng: parseFloat($("#lenLoc").val())};
+        setMyLocation(coords);
+    });
+  } 
+
+	function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+      var R = 6371; // Radius of the earth in km
+      var dLat = deg2rad(lat2-lat1);  // deg2rad below
+      var dLon = deg2rad(lon2-lon1); 
+      var a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2)
+        ; 
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+      var d = R * c; // Distance in km
+      return d;
+    }
+
+    function deg2rad(deg) {
+      return deg * (Math.PI/180)
+    }
+
+    function getListOfClosestVillages(list, coords, length) {
+      var result = []
+
+      for (i = 0; i < list.length; i++) {
+        if (getDistanceFromLatLonInKm(list[i].lat, list[i].lng, coords.lat, coords.lng) <= length) {
+          result += [coords]
+        }
+      }
+
+      return result
+    }
+</script>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBwbsD_1fcone450PTkpMAy_u40_CVcGms&callback=initMap">
+</script>
+</body>
+</html>
