@@ -34,9 +34,10 @@
 
 <script>
   var map;
-  var markersCollection = new Map();
+  var myLocationMarker = undefined;
 
   function getInitialCoords() {
+    
     return {lat: 52.14, lng: 21.1};
   }
 
@@ -55,13 +56,21 @@
       map: map
     });
 
-    markersCollection.set(coords, map);
+    return marker;
+  }
+
+  function setMyLocation(coords){
+    if (myLocationMarker !== undefined){
+        myLocationMarker.setMap(null);
+    }
+
+    myLocationMarker = setMarker(coords);
   }
 
   function setupListeners(){
     //MapMouseClick
     map.addListener('click', function(event) {
-      setMarker(event.latLng);
+      setMyLocation(event.latLng);
     })
   }
 
