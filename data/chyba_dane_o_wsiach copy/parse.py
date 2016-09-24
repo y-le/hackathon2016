@@ -13,7 +13,20 @@ tab = []
 
 with open('02-table 1.csv') as file:
 	for line in file:
-		print line.split(';')
+		split = line.split(';')
+		if (len(split) >= 14 and split[1].isdigit and len(split[1]) == 7):
+			#print split[0], split[1], split[2]
+
+			datum = {}
+			datum['name'] = split[0]
+			datum['teryt'] = split[1]
+			datum['population'] = split[2]
+			print datum
+
+
+
+
+
 
 
 
