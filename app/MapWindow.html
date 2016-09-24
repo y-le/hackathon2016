@@ -39,8 +39,9 @@
 <script>
   var map;
   var myLocationMarker = undefined;
+  var markers = [];
   var communicationNodes = [{lat: 52.2, lng: 21.1}, {lat: 52.15, lng: 21.2}];
-  var radius = 100;
+  var radius = 9;
 
   var iconPathBase = "img/";
   var icons = {
@@ -68,12 +69,22 @@
       icon: icon
     });
 
+    markers.push(marker);
+
     return marker;
   }
 
   function setMarkers(listOfCoords, icon){
     for (var i = 0; i < listOfCoords.length; i++) {
         setMarker(listOfCoords[i], icon);
+    }
+  }
+
+  function clearMarkers(){
+    for (var i = 0; i < markers.length; i++){
+        if (markers[i] !== myLocationMarker){
+            markers[i].setMap(null);
+        }
     }
   }
 
@@ -88,6 +99,7 @@
   }
 
   function updateView(coords){
+    clearMarkers();
     map.setCenter(coords);
     
     var closestVillages = getListOfClosestVillages(communicationNodes, coords, radius);
