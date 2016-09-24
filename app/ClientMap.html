@@ -43,6 +43,9 @@
  var map;
   var myLocationMarker = undefined;
   var communicationNodes = [{lat: 52.2, lng: 21.1}, {lat: 52.15, lng: 21.2}];
+	var addresses = ["MAŁOPOLSKIE nowotarski Rabka-Zdrój Rabka-Zdrój 1", 
+					"WIELKOPOLSKIE wolsztyński Siedlec Wąchabno 1"];
+
 
   var iconPathBase = "img/";
   var icons = {
@@ -78,8 +81,14 @@ function doIt() {
       zoom: 6,
       center: getInitialCoords()
     });
-	for (var i = 0; i < communicationNodes.length; i++){
-		setMarker(communicationNodes[i], icons.radiotower.icon);
+	for (var i = 0; i < addresses.length; i++){
+		alert(addresses[i]);
+		var current = getCoordsByAddress(addresses[i]);
+		
+		if (current == undefined) {
+			alert("ups...");
+		}
+		setMarker(current, icons.radiotower.icon);
 	}
     setupListeners();
     setMyLocation(getInitialCoords());
@@ -105,7 +114,20 @@ function doIt() {
     updateView(coords);
   }
 
-
+	function getCoordsByAddress(address) {
+		var geocoder = new google.maps.Geocoder();
+		geocoder.geocode( { 'address': address}, function(results, status) {
+	      var result = null;
+	      if (status == 'OK') {
+	        result = results[0].geometry.location;
+	        alert("1" + result);
+	      } else {
+	      	alert(":(");
+	      }
+	    });
+	    alert("2" + self.result);
+	    return result;
+	}
 
   function setupListeners(){
     //MapMouseClick
@@ -130,7 +152,26 @@ function doIt() {
 	        map: map
 	    });
 	}
+    var marker, i;
 
+    for (i = 0; i < addresses.length; i++) {
+    	var current = getCoordsByAddress(addresses[i]);
+    	alert(addresses[i]);
+    	if (current == undefined) {
+    		alert("ehm...");
+    	}
+      marker = new google.maps.Marker({
+        position: current,
+        map: map
+      });
+
+      google.maps.event.addListener(marker, 'click', (function(marker, i) {
+        return function() {
+          infowindow.setContent(locations[i][0]);
+          infowindow.open(map, marker);
+        }
+      })(marker, i));
+    }
 </script>
 <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBwbsD_1fcone450PTkpMAy_u40_CVcGms&callback=initMap">
