@@ -40,6 +40,7 @@
   var map;
   var myLocationMarker = undefined;
   var communicationNodes = [{lat: 52.2, lng: 21.1}, {lat: 52.15, lng: 21.2}];
+  var radius = 100;
 
   var iconPathBase = "img/";
   var icons = {
@@ -56,9 +57,7 @@
       zoom: 6,
       center: getInitialCoords()
     });
-	for (var i = 0; i < communicationNodes.length; i++){
-		setMarker(communicationNodes[i], icons.radiotower.icon);
-	}
+	
     setupListeners();
   }
 
@@ -70,6 +69,12 @@
     });
 
     return marker;
+  }
+
+  function setMarkers(listOfCoords, icon){
+    for (var i = 0; i < listOfCoords.length; i++) {
+        setMarker(listOfCoords[i], icon);
+    }
   }
 
   function setMyLocation(coords){
@@ -85,17 +90,21 @@
   function updateView(coords){
     map.setCenter(coords);
     
-    fitBounds(coords);
+    var closestVillages = getListOfClosestVillages(communicationNodes, coords, radius);
+    setMarkers(closestVillages, icons.radiotower.icon);
+    closestVillages.push(coords);
+    fitBounds(closestVillages);
+
     $("#latLoc").val(coords.lat);
     $("#lenLoc").val(coords.lng);
 
   }
 
-  function fitBounds(initialCoords){
+  function fitBounds(coordsList){
     var bounds = new google.maps.LatLngBounds();
-    bounds.extend(initialCoords);
-    for (var i = 0; i < communicationNodes.length; i++) {
-        bounds.extend(communicationNodes[i]);
+
+    for (var i = 0; i < coordsList.length; i++) {
+        bounds.extend(coordsList[i]);
     }
     map.fitBounds(bounds);
   }
@@ -114,7 +123,7 @@
   } 
 
 	function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
-      var R = 6371; // Radius of the earth in km
+      /*var R = 6371; // Radius of the earth in km
       var dLat = deg2rad(lat2-lat1);  // deg2rad below
       var dLon = deg2rad(lon2-lon1); 
       var a = 
@@ -124,24 +133,26 @@
         ; 
       var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
       var d = R * c; // Distance in km
-      return d;
+      return d;*/
+      return 10;
     }
 
     function deg2rad(deg) {
-      return deg * (Math.PI/180)
+      return deg * (Math.PI/180);
     }
 
     function getListOfClosestVillages(list, coords, length) {
-      var result = []
+      var result = [];
 
       for (i = 0; i < list.length; i++) {
         if (getDistanceFromLatLonInKm(list[i].lat, list[i].lng, coords.lat, coords.lng) <= length) {
-          result += [coords]
+          result.push(list[i]);
         }
       }
 
-      return result
+      return result;
     }
+
 </script>
 <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBwbsD_1fcone450PTkpMAy_u40_CVcGms&callback=initMap">
