@@ -39,6 +39,7 @@
 <script>
   var map;
   var myLocationMarker = undefined;
+  var communicationNodes = []
 
   function getInitialCoords() {
     return {lat: 52.14, lng: 21.1};
@@ -68,8 +69,13 @@
     }
 
     myLocationMarker = setMarker(coords);
+    
+    updateView(coords);
+  }
+
+  function updateView(coords){
     map.setCenter(coords);
-    map.setZoom(11);
+    map.setZoom(12);
   }
 
   function setupListeners(){
