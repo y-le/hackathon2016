@@ -58,6 +58,11 @@
       zoom: 6,
       center: getInitialCoords()
     });
+	console.log(communicationNodes.length);
+	$.getJSON("points.json", function(json) {	
+    communicationNodes = json; // this will show the info it in firebug console
+	console.log(communicationNodes.length);
+});
 	
     setupListeners();
   }
@@ -104,6 +109,7 @@
     map.setCenter(coords);
     
     var closestVillages = getListOfClosestVillages(communicationNodes, coords, radius);
+	
     setMarkers(closestVillages, icons.radiotower.icon);
     closestVillages.push(coords);
     fitBounds(closestVillages);
