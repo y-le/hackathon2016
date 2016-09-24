@@ -25,9 +25,15 @@
         <input type="number" class="form-control" id="lenLoc" value="21.020"/>
 		<button type="button" class="btn btn-default" id="localization-button">Szukaj</button>
 	</div>
-	<ul id="places">
-	<li>miejsca</li>
-	</ul>
+	<div class="panel panel-default">
+	  <!-- Default panel contents -->
+	  <div class="panel-heading">Jakis tekst o wiochach</div>
+
+	  <!-- Table -->
+	  <table class="table">
+		
+	  </table>
+	</div>
 </div>
 <div id="map"></div>
 
@@ -52,7 +58,18 @@
   function getInitialCoords() {
     return {lat: 52.14, lng: 21.1};
   }
-
+  
+  var rowId = 0;
+  function addRow(){
+	$(".table").append('<tr id=\"' + rowId + '\"' + '><td>my data' + rowId + '</td><td>more data</td></tr>');
+	$("#" + rowId ).click(function() { console.log($(this).html());});
+	rowId = rowId + 1;
+  }
+	
+  function villageClicked(row) {
+	console.log(row.innerHtml);
+  }
+  
   function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
       zoom: 6,
@@ -62,6 +79,8 @@
 	$.getJSON("points.json", function(json) {	
     communicationNodes = json; // this will show the info it in firebug console
 	console.log(communicationNodes.length);
+	
+	$(".rowek").click(function() { console.log("kurwaaa");});
 });
 	
     setupListeners();
@@ -105,6 +124,7 @@
   }
 
   function updateView(coords){
+   
     clearMarkers();
     map.setCenter(coords);
     
@@ -139,6 +159,9 @@
         var coords = {lat: parseFloat($("#latLoc").val()), lng: parseFloat($("#lenLoc").val())};
         setMyLocation(coords);
     });
+	
+	$("#localization-button").click(function(){addRow()});
+	
   } 
 
 	function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
