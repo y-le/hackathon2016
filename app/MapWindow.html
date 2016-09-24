@@ -11,18 +11,42 @@
 <body>
 <h3>My Google Maps Demo</h3>
 <div id="map"></div>
+
+
 <script>
+  var map;
+  var markersCollection = new Map();
+
+  function getInitialCoords() {
+    return {lat: 52.14, lng: 21.1};
+  }
+
   function initMap() {
-    var uluru = {lat: -25.363, lng: 131.044};
-    var map = new google.maps.Map(document.getElementById('map'), {
-      zoom: 4,
-      center: uluru
+    map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 6,
+      center: getInitialCoords()
     });
+
+    setupListeners();
+  }
+
+  function setMarker(coords){
     var marker = new google.maps.Marker({
-      position: uluru,
+      position: coords,
       map: map
     });
+
+    markersCollection.set(coords, map);
   }
+
+  function setupListeners(){
+    //MapMouseClick
+    map.addListener('click', function(event) {
+      setMarker(event.latLng);
+    })
+  }
+
+
 </script>
 <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBwbsD_1fcone450PTkpMAy_u40_CVcGms&callback=initMap">
