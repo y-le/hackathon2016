@@ -17,26 +17,27 @@
 <body>
 <div id="wrapper">
 <h3>My Google Maps Demo</h3>
-<div id="sidebar-wrapper">
-	<div id="coords"><label for="usr">Twoja lokalizacja:</label><br/>
-        <label for="latLoc">Szerokość</label>
-		<input type="number" class="form-control" id="latLoc" value="52.259"/>
-        <label for="lenLoc">Długość</label>
-        <input type="number" class="form-control" id="lenLoc" value="21.020"/>
-		<button type="button" class="btn btn-default" id="localization-button">Szukaj</button>
-	</div>
-	<ul id="places">
-	<li>miejsca</li>
-	</ul>
-</div>
+<form>
+  Imie:<br>
+  <input type="text" name="Imie"><br>
+  Nazwisko:<br>
+  <input type="text" name="Nazwisko"><br>
+  Email:<br>
+  <input type="text" name="Email"><br>
+  Telefon:<br>
+  <input type="text" name="Telefon"><br>
+  Uwagi:<br>
+  <input type="text" name="Uwagi" value="Uwagi odnośnie czegoś" id="asd"><br>
+</form> 
+
 <div id="map"></div>
-
-
-
 
 </div>
 
 <script>
+
+ document.getElementById("asd").style.color = "#d3d3d3";
+ document.getElementById("asd").onclick=function(){document.getElementById("asd").value=""}; 
   var map;
   var myLocationMarker = undefined;
   var communicationNodes = [{lat: 52.2, lng: 21.1}, {lat: 52.15, lng: 21.2}];
