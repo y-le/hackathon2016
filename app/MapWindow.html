@@ -41,6 +41,12 @@
   var myLocationMarker = undefined;
   var communicationNodes = [{lat: 52.2, lng: 21.1}, {lat: 52.15, lng: 21.2}];
 
+  var iconPathBase = "img/";
+  var icons = {
+      radiotower: {
+        icon: iconPathBase + 'radiotower.png'}
+    };
+
   function getInitialCoords() {
     return {lat: 52.14, lng: 21.1};
   }
@@ -51,15 +57,16 @@
       center: getInitialCoords()
     });
 	for (var i = 0; i < communicationNodes.length; i++){
-		setMarker(communicationNodes[i]);
+		setMarker(communicationNodes[i], icons.radiotower.icon);
 	}
     setupListeners();
   }
 
-  function setMarker(coords){
+  function setMarker(coords, icon){
     var marker = new google.maps.Marker({
       position: coords,
-      map: map
+      map: map,
+      icon: icon
     });
 
     return marker;
