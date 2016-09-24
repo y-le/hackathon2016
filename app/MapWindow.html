@@ -39,7 +39,7 @@
 <script>
   var map;
   var myLocationMarker = undefined;
-  var communicationNodes = [];
+  var communicationNodes = [{lat: 52.2, lng: 21.1}, {lat: 52.15, lng: 21.2}];
 
   function getInitialCoords() {
     return {lat: 52.14, lng: 21.1};
@@ -50,7 +50,9 @@
       zoom: 6,
       center: getInitialCoords()
     });
-
+	for (var i = 0; i < communicationNodes.length; i++){
+		setMarker(communicationNodes[i]);
+	}
     setupListeners();
   }
 
@@ -86,7 +88,7 @@
     var bounds = new google.maps.LatLngBounds();
     bounds.extend(initialCoords);
     for (var i = 0; i < communicationNodes.length; i++) {
-        bounds.extend(communicationNodes[i].getPosition());
+        bounds.extend(communicationNodes[i]);
     }
     map.fitBounds(bounds);
   }
@@ -102,9 +104,37 @@
         var coords = {lat: parseFloat($("#latLoc").val()), lng: parseFloat($("#lenLoc").val())};
         setMyLocation(coords);
     });
-  }
+  } 
 
+	function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+      var R = 6371; // Radius of the earth in km
+      var dLat = deg2rad(lat2-lat1);  // deg2rad below
+      var dLon = deg2rad(lon2-lon1); 
+      var a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2)
+        ; 
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+      var d = R * c; // Distance in km
+      return d;
+    }
 
+    function deg2rad(deg) {
+      return deg * (Math.PI/180)
+    }
+
+    function getListOfClosestVillages(list, coords, length) {
+      var result = []
+
+      for (i = 0; i < list.length; i++) {
+        if (getDistanceFromLatLonInKm(list[i].lat, list[i].lng, coords.lat, coords.lng) <= length) {
+          result += [coords]
+        }
+      }
+
+      return result
+    }
 </script>
 <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBwbsD_1fcone450PTkpMAy_u40_CVcGms&callback=initMap">
