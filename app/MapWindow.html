@@ -1,299 +1,449 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
+
 <head>
-<!-- Bootstrap Core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Custom CSS -->
-    <link href="css/simple-sidebar.css" rel="stylesheet">
-  <style>
-    #map {
-      height: 400px;
-      width: 100%;
-    }
-  </style>
-  <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
-</head>
-<body>
-<div id="wrapper">
-<h3>My Google Maps Demo</h3>
-<div id="sidebar-wrapper">
-	<div id="coords"><label for="usr">Twoja lokalizacja:</label><br/>
-        <label for="latLoc">Szerokość</label>
-		<input type="number" class="form-control" id="latLoc" value="54.21145178746455"/>
-        <label for="lenLoc">Długość</label>
-        <input type="number" class="form-control" id="lenLoc" value="22.055740356445312"/>
-		<button type="button" class="btn btn-default" id="localization-button">Szukaj</button>
-	</div>
-	<div class="panel panel-default">
-	  <!-- Default panel contents -->
-	  <div class="panel-heading" style="font-weight: bold; text-align: center">Pobliskie miejscowości</div>
-
-	  <!-- Table -->
-	  <table class="table" id="tabelaWiosek">
-	  <tr><td>Nazwa miejscowości</td><td>Odległość [km]</td><td>Liczba mieszkańców</td></tr>
-		
-	  </table>
-	</div>
-</div>
-<div id="map"></div>
-<div class="panel panel-default">
-	  <!-- Default panel contents -->
-	  <div class="panel-heading" style="font-weight: bold; text-align: center">Dostępne przyłącza</div>
-
-	  <!-- Table -->
-	  <table class="table" id="tabelaNodow" >
-	  <tr><td>Nazwa właściciela</td><td>Odległość od miejscowości</td><td>Szybkość łącza</td></tr>
-	  </table>
-	</div>
-
-
-
-</div>
-
-<script>
-
-  var map;
-  var myLocationMarker = undefined;
-  var markers = [];
-  var communicationNodes = [{lat: 52.2, lng: 21.1}, {lat: 52.15, lng: 21.2}];
-  var villages = [{name: "Abc", dystansDoNas: 0, liczbaMieszkancow: 200, obszar: 2.23, lat: 54.21145178746455, lng: 22.055740356445312}];
-  var radius = 10;
-  var wlasciciele = ['Orion', 'JakuBas', 'TaniInternet', 'Wlaczek'];
-  var lacza = [ 'światłowód', 'miedź'];
-  var wioska;
-
-  var iconPathBase = "img/";
-  var icons = {
-      radiotower: {
-        icon: iconPathBase + 'radiotower.png'},
-	  village: {
-	    icon: iconPathBase + 'house.png' }
-    };
-
-  function getInitialCoords() {
-    return {lat: 54.21145178746455, lng: 22.055740356445312};
-  }
-  
-  var rowId = 0;
-  function addRow(village){
-	$("#tabelaWiosek").append('<tr id=\"' + rowId + '\"' + '><td>' + village.glowna + '</td><td>' + getDistanceFromLatLonInKm(village.lat, village.lng, myLocationMarker.getPosition().lat(), myLocationMarker.getPosition().lng()).toFixed(1) + '</td><td>' + village.populacja + '</td></input><td style=\"display:none\">' + parseFloat(village.lat) + '</td><td style=\"display:none\">' + parseFloat(village.lng) + '</td></tr>');
-	$("#" + rowId ).click(function() { villageClicked(this); });
-	var colorCopy = $("#" + rowId).css('backgroundColor');
-	//TODO: zmienic na ladny kolor 
-	$("#" + rowId).hover(function() {$(this).css({background:'lightblue'}); });
-	$("#" + rowId).mouseleave(function() {$(this).css({background:colorCopy}); });
-	rowId = rowId + 1;
-  }
-  
-  function nodeClicked(node){
-	window.location.replace("to_buy.html");
-  }
-  
-  var rowId2 = 0;
-  function addRow2(node){
-	$("#tabelaNodow").append('<tr id=\"a' + rowId2 + '\"' + '><td>' + wlasciciele[Math.floor((Math.random() * 10)) % 4] + '</td><td>' + getDistanceFromLatLonInKm(wioska.lat, wioska.lng, node.lat, node.lng) + '</td><td>' + lacza[Math.floor((Math.random() * 10)) % 2] + '</td></input><td style=\"display:none\">' + node.lat + '</td><td style=\"display:none\">' + node.lng + '</td></tr>');
-	$("#a" + rowId2 ).click(function() { nodeClicked(this); });
-	var colorCopy = $("#a" + rowId2).css('backgroundColor');
-	//TODO: zmienic na ladny kolor 
-	$("#a" + rowId2).hover(function() {$(this).css({background:'lightblue'}); });
-	$("#a" + rowId2).mouseleave(function() {$(this).css({background:colorCopy}); });
-	rowId2 = rowId2 + 1;
-  }
-	
-  function villageClicked(row) {
-	clearMarkers();
-	$("#tabelaNodow").html("<tr><td>Nazwa właściciela</td><td>Odległość od miejscowości</td><td>Szybkość łącza</td></tr>");
-	listOfChildren = $(row).children();
-	len = listOfChildren.length;
-	
-	vilCoords = {lat: parseFloat($(listOfChildren[len - 2]).html()),
-				lng: parseFloat($(listOfChildren[len - 1]).html())};
-	wioska = vilCoords;
-				
-	setMarker(vilCoords, icons.village.icon);
-	
-	var closestNodes = getListOfclosestNodes(communicationNodes, vilCoords, radius);
-	closestNodes.sort(function(a, b){ getDistanceFromLatLonInKm(a.lat, a.lng, vilCoords.lat, vilCoords.lng) <
-										getDistanceFromLatLonInKm(b.lat, b.lng, vilCoords.lat, vilCoords.lng)});
-										
-	range = 5;
-	if (range > closestNodes.length){
-		range = closestNodes.length;
-	}
-	
-	
-	sliced = closestNodes.slice(0, range);
-	
-	// dodac dobre baze nodow
-	for (var i = 0; i < sliced.length; ++i){
-		addRow2({name:'nazwa', dystansDoNas:123, szybkosc:321, lat:sliced[i].lat, lng:sliced[i].lng});
-	}
-	setMarkers(sliced, icons.radiotower.icon);
-    sliced.push(vilCoords);
-	sliced.push({lat:myLocationMarker.getPosition().lat(), lng:myLocationMarker.getPosition().lng() });
-    fitBounds(sliced);
-  }
-  
-  function initMap() {
-    map = new google.maps.Map(document.getElementById('map'), {
-      zoom: 6,
-      center: getInitialCoords()
-    });
-	
-	//console.log(communicationNodes.length);
-	$.getJSON("points.json", function(json) {	
-	console.log("jestem");
-    communicationNodes = json; // this will show the info it in firebug console
-	console.log(communicationNodes.length);
-	
-	//$(".rowek").click(function() { console.log("asd");});
-});
-	
-
-	
-	//console.log(communicationNodes.length);
-	$.getJSON("wynik.json", function(json) {	
-	console.log("jestem2");
-    villages = json; // this will show the info it in firebug console
-	villages2 = []
-	for (var i = 0; i < villages.length; ++i){
-	 villages2.push({populacja: parseInt(villages[i].populacja),
-		glowna: villages[i].glowna, 
-		lat: parseFloat(villages[i].lat),
-		lng: parseFloat(villages[i].lng)});
-	}
-	villages = villages2;
-	console.log(villages.length);
-	
-	//$(".rowek").click(function() { console.log("asd");});
-});
-	
-	
-	setupListeners();
-  }
-
-  function setMarker(coords, icon){
-    //alert(coords.lat + " " + coords.lng);
-    var marker = new google.maps.Marker({
-      position: coords,
-      map: map,
-      icon: icon
-    });
-
-    markers.push(marker);
-
-    return marker;
-  }
-
-  function setMarkers(listOfCoords, icon){
-    for (var i = 0; i < listOfCoords.length; i++) {
-        setMarker(listOfCoords[i], icon);
-    }
-  }
-
-  function clearMarkers(){
-    for (var i = 0; i < markers.length; i++){
-        if (markers[i] !== myLocationMarker){
-            markers[i].setMap(null);
+    <meta charset="utf-8" />
+    <link rel="apple-touch-icon" sizes="76x76" href="img/apple-icon.png">
+    <link rel="icon" type="image/png" href="img/favicon.png">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>Hackathon 2016</title>
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+    <!--     Fonts and icons     -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
+    <!-- CSS Files -->
+    <!-- build:css styles/vendor.css -->
+    <!-- bower:css -->
+    <link href="styles/vendor.css" rel="stylesheet" />
+    <link href="styles/material-kit.css" rel="stylesheet" />
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- CSS Just for demo purpose, don't include it in your project -->
+    <!-- build:css styles/main.css -->
+    <link href="styles/main.css" rel="stylesheet" />
+    <!-- endbuild -->
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
         }
-    }
-  }
+    </style>
+    <!-- build:js scripts/jquery.js -->
+    <!-- bower:js -->
+    <script src="/bower_components/jquery/jquery.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+</head>
 
-  function setMyLocation(coords){
-    if (myLocationMarker !== undefined){
-        myLocationMarker.setMap(null);
-    }
-    //alert(coords.lat);
-    myLocationMarker = setMarker(coords);
-    
-    updateView(coords);
-  }
-  
-  /*var closestNodes = getListOfclosestNodes(communicationNodes, coords, radius);
+<body class="vendor-page">
+    <div id="layout-wrapper">
+        <!-- Navbar -->
+        <nav class="navbar navbar-transparent navbar-fixed-top navbar-color-on-scroll">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navigation-index"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
+                    <a href="/">
+                        <div class="logo-container">
+                            <div class="logo"> </div>
+                            <div class="brand">
+                                <h3 style="width:600px">My Google Maps Demo</h3> </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="collapse navbar-collapse" id="navigation-index">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a rel="tooltip" title="Follow us on Twitter" data-placement="bottom" href="https://twitter.com/CreativeTim" target="_blank" class="btn btn-white btn-simple btn-just-icon"> <i class="fa fa-twitter"></i> </a>
+                        </li>
+                        <li>
+                            <a rel="tooltip" title="Like us on Facebook" data-placement="bottom" href="https://www.facebook.com/CreativeTim" target="_blank" class="btn btn-white btn-simple btn-just-icon"> <i class="fa fa-facebook-square"></i> </a>
+                        </li>
+                        <li>
+                            <a rel="tooltip" title="Like us on Google+" data-placement="bottom" href="#" target="_blank" class="btn btn-white btn-simple btn-just-icon"> <i class="fa fa-google-plus"></i> </a>
+                        </li>
+                        <li>
+                            <a rel="tooltip" title="Follow us on Instagram" data-placement="bottom" href="https://www.instagram.com/CreativeTimOfficial" target="_blank" class="btn btn-white btn-simple btn-just-icon"> <i class="fa fa-instagram"></i> </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- End Navbar -->
+        <div class="wrapper">
+            <div class="header header-filter" style="background-image: url('img/bg2.jpeg');"> &nbsp; </div>
+        </div>
+        <div class="main main-raised">
+            <div class="section section-basic">
+                <div class="container full-width">
+                    <div class="row">
+                        <div class="col-md-4 pull-left">
+                            <div id="sidebar-wrapper">
+                                <div class="form-group" id="coords">
+                                    <label for="usr">Twoja lokalizacja:</label>
+                                    <input type="number" class="form-control" id="yourLoc" value="" />
+                                    <label for="latLoc">Szerokość</label>
+                                    <input type="number" class="form-control" id="latLoc" value="54.21145178746455" />
+                                    <label for="lenLoc">Długość</label>
+                                    <input type="number" class="form-control" id="lenLoc" value="22.055740356445312" />
+                                    <button type="button" class="btn btn-default" id="localization-button">Szukaj</button>
+                                </div>
+                                <div class="panel panel-default">
+                                    <!-- Default panel contents -->
+                                    <div class="panel-heading" style="font-weight: bold; text-align: center">Pobliskie miejscowości</div>
+                                    <!-- Table -->
+                                    <table class="table" id="tabelaWiosek">
+                                        <tr>
+                                            <td>Nazwa miejscowości</td>
+                                            <td>Odległość [km]</td>
+                                            <td>Liczba mieszkańców</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8 pull-right">
+                            <div id="map" class="google-mapsy"></div>
+                            <div class="panel panel-default">
+                                <!-- Default panel contents -->
+                                <div class="panel-heading" style="font-weight: bold; text-align: center">Dostępne przyłącza</div>
+                                <!-- Table -->
+                                <table class="table" id="tabelaNodow">
+                                    <tr>
+                                        <td>Nazwa właściciela</td>
+                                        <td>Odległość od miejscowości</td>
+                                        <td>Szybkość łącza</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="footer">
+            <div class="container">
+                <nav class="pull-left">
+                    <ul>
+                        <li> <a href="#">
+							Hackathon danych publicznych
+						</a> </li>
+                        <li> <a href="#">
+						   O nas
+						</a> </li>
+                        <li> <a href="#">
+							Licencje
+						</a> </li>
+                    </ul>
+                </nav>
+                <div class="copyright pull-right"> &copy; 2016, made with <i class="material-icons">favorite</i> by null. </div>
+            </div>
+        </footer>
+    </div>
+    <!-- #layout-wrapper -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBwbsD_1fcone450PTkpMAy_u40_CVcGms&callback=initMap">
+    </script>
+</body>
+<!--   Core JS Files   -->
+<!-- build:js scripts/plugins.js -->
+<script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/affix.js"></script>
+<script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/alert.js"></script>
+<script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/dropdown.js"></script>
+<script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/tooltip.js"></script>
+<script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/modal.js"></script>
+<script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/transition.js"></script>
+<script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/button.js"></script>
+<script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/popover.js"></script>
+<script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/carousel.js"></script>
+<script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/scrollspy.js"></script>
+<script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/collapse.js"></script>
+<script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/tab.js"></script>
+<!-- endbuild -->
+<!-- build:js scripts/vendor.js -->
+<!-- bower:js -->
+<script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap.js"></script>
+<script src="/bower_components/material-kit/assets/js/material.min.js"></script>
+<!-- endbower -->
+<!-- endbuild -->
+<!--  Plugin for the Sliders, full documentation here: http://refreshless.com/nouislider/ -->
+<script src="js/nouislider.min.js" type="text/javascript"></script>
+<!--  Plugin for the Datepicker, full documentation here: http://www.eyecon.ro/bootstrap-datepicker/ -->
+<script src="js/bootstrap-datepicker.js" type="text/javascript"></script>
+<!-- Control Center for Material Kit: activating the ripples, parallax effects, scripts from the example pages etc -->
+<script src="js/material-kit.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $().ready(function () {
+        // the body of this function is in material-kit.js
+        materialKit.initSliders();
+        window_width = $(window).width();
+        if (window_width >= 992) {
+            big_image = $('.wrapper > .header');
+            $(window).on('scroll', materialKitDemo.checkScrollForParallax);
+        }
+    });
+</script>
+<script>
+    $().ready(function () {
+        var map;
+        var myLocationMarker = undefined;
+        var markers = [];
+        var communicationNodes = [{
+            lat: 52.2
+            , lng: 21.1
+        }, {
+            lat: 52.15
+            , lng: 21.2
+        }];
+        var villages = [{
+            name: "Abc"
+            , dystansDoNas: 0
+            , liczbaMieszkancow: 200
+            , obszar: 2.23
+            , lat: 54.21145178746455
+            , lng: 22.055740356445312
+        }];
+        var radius = 10;
+        var wlasciciele = ['Orion', 'JakuBas', 'TaniInternet', 'Wlaczek'];
+        var lacza = ['światłowód', 'miedź'];
+        var wioska;
+        var iconPathBase = "img/";
+        var icons = {
+            radiotower: {
+                icon: iconPathBase + 'radiotower.png'
+            }
+            , village: {
+                icon: iconPathBase + 'house.png'
+            }
+        };
+
+        function getInitialCoords() {
+            return {
+                lat: 54.21145178746455
+                , lng: 22.055740356445312
+            };
+        }
+        var rowId = 0;
+
+        function addRow(village) {
+            $("#tabelaWiosek").append('<tr id=\"' + rowId + '\"' + '><td>' + village.glowna + '</td><td>' + getDistanceFromLatLonInKm(village.lat, village.lng, myLocationMarker.getPosition().lat(), myLocationMarker.getPosition().lng()).toFixed(1) + '</td><td>' + village.populacja + '</td></input><td style=\"display:none\">' + parseFloat(village.lat) + '</td><td style=\"display:none\">' + parseFloat(village.lng) + '</td></tr>');
+            $("#" + rowId).click(function () {
+                villageClicked(this);
+            });
+            var colorCopy = $("#" + rowId).css('backgroundColor');
+            //TODO: zmienic na ladny kolor 
+            $("#" + rowId).hover(function () {
+                $(this).css({
+                    background: 'lightblue'
+                });
+            });
+            $("#" + rowId).mouseleave(function () {
+                $(this).css({
+                    background: colorCopy
+                });
+            });
+            rowId = rowId + 1;
+        }
+
+        function nodeClicked(node) {
+            window.location.replace("to_buy.html");
+        }
+        var rowId2 = 0;
+
+        function addRow2(node) {
+            $("#tabelaNodow").append('<tr id=\"a' + rowId2 + '\"' + '><td>' + wlasciciele[Math.floor((Math.random() * 10)) % 4] + '</td><td>' + getDistanceFromLatLonInKm(wioska.lat, wioska.lng, node.lat, node.lng) + '</td><td>' + lacza[Math.floor((Math.random() * 10)) % 2] + '</td></input><td style=\"display:none\">' + node.lat + '</td><td style=\"display:none\">' + node.lng + '</td></tr>');
+            $("#a" + rowId2).click(function () {
+                nodeClicked(this);
+            });
+            var colorCopy = $("#a" + rowId2).css('backgroundColor');
+            //TODO: zmienic na ladny kolor 
+            $("#a" + rowId2).hover(function () {
+                $(this).css({
+                    background: 'lightblue'
+                });
+            });
+            $("#a" + rowId2).mouseleave(function () {
+                $(this).css({
+                    background: colorCopy
+                });
+            });
+            rowId2 = rowId2 + 1;
+        }
+
+        function villageClicked(row) {
+            clearMarkers();
+            $("#tabelaNodow").html("<tr><td>Nazwa właściciela</td><td>Odległość od miejscowości</td><td>Szybkość łącza</td></tr>");
+            listOfChildren = $(row).children();
+            len = listOfChildren.length;
+            vilCoords = {
+                lat: parseFloat($(listOfChildren[len - 2]).html())
+                , lng: parseFloat($(listOfChildren[len - 1]).html())
+            };
+            wioska = vilCoords;
+            setMarker(vilCoords, icons.village.icon);
+            var closestNodes = getListOfclosestNodes(communicationNodes, vilCoords, radius);
+            closestNodes.sort(function (a, b) {
+                getDistanceFromLatLonInKm(a.lat, a.lng, vilCoords.lat, vilCoords.lng) < getDistanceFromLatLonInKm(b.lat, b.lng, vilCoords.lat, vilCoords.lng)
+            });
+            range = 5;
+            if (range > closestNodes.length) {
+                range = closestNodes.length;
+            }
+            sliced = closestNodes.slice(0, range);
+            // dodac dobre baze nodow
+            for (var i = 0; i < sliced.length; ++i) {
+                addRow2({
+                    name: 'nazwa'
+                    , dystansDoNas: 123
+                    , szybkosc: 321
+                    , lat: sliced[i].lat
+                    , lng: sliced[i].lng
+                });
+            }
+            setMarkers(sliced, icons.radiotower.icon);
+            sliced.push(vilCoords);
+            sliced.push({
+                lat: myLocationMarker.getPosition().lat()
+                , lng: myLocationMarker.getPosition().lng()
+            });
+            fitBounds(sliced);
+        }
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 6
+                , center: getInitialCoords()
+            });
+            //console.log(communicationNodes.length);
+            $.getJSON("points.json", function (json) {
+                console.log("jestem");
+                communicationNodes = json; // this will show the info it in firebug console
+                console.log(communicationNodes.length);
+                //$(".rowek").click(function() { console.log("asd");});
+            });
+            //console.log(communicationNodes.length);
+            $.getJSON("wynik.json", function (json) {
+                console.log("jestem2");
+                villages = json; // this will show the info it in firebug console
+                villages2 = []
+                for (var i = 0; i < villages.length; ++i) {
+                    villages2.push({
+                        populacja: parseInt(villages[i].populacja)
+                        , glowna: villages[i].glowna
+                        , lat: parseFloat(villages[i].lat)
+                        , lng: parseFloat(villages[i].lng)
+                    });
+                }
+                villages = villages2;
+                console.log(villages.length);
+                //$(".rowek").click(function() { console.log("asd");});
+            });
+            setupListeners();
+        }
+
+        function setMarker(coords, icon) {
+            //alert(coords.lat + " " + coords.lng);
+            var marker = new google.maps.Marker({
+                position: coords
+                , map: map
+                , icon: icon
+            });
+            markers.push(marker);
+            return marker;
+        }
+
+        function setMarkers(listOfCoords, icon) {
+            for (var i = 0; i < listOfCoords.length; i++) {
+                setMarker(listOfCoords[i], icon);
+            }
+        }
+
+        function clearMarkers() {
+            for (var i = 0; i < markers.length; i++) {
+                if (markers[i] !== myLocationMarker) {
+                    markers[i].setMap(null);
+                }
+            }
+        }
+
+        function setMyLocation(coords) {
+            if (myLocationMarker !== undefined) {
+                myLocationMarker.setMap(null);
+            }
+            //alert(coords.lat);
+            myLocationMarker = setMarker(coords);
+            updateView(coords);
+        }
+        /*var closestNodes = getListOfclosestNodes(communicationNodes, coords, radius);
 	
     setMarkers(closestNodes, icons.radiotower.icon);
     closestNodes.push(coords);
     fitBounds(closestNodes);*/
-
-  function updateView(coords){
-   
-    clearMarkers();
-    map.setCenter(coords);
-
-    var closestVillages = getListOfclosestNodes(villages, coords, radius);
-	$("#tabelaWiosek").html("<tr><td>Nazwa miejscowości</td><td>Odległość</td><td>Liczba mieszkańców</td></tr>");
-	for (var i = 0; i < closestVillages.length; ++i){
-		addRow(closestVillages[i]);
-	}
-    setMarkers(closestVillages, icons.village.icon);
-    closestVillages.push(coords);
-    fitBounds(closestVillages);
-
-	
-
-    $("#latLoc").val(coords.lat);
-    $("#lenLoc").val(coords.lng);
-
-  }
-
-  function fitBounds(coordsList){
-    var bounds = new google.maps.LatLngBounds();
-
-    for (var i = 0; i < coordsList.length; i++) {
-        bounds.extend(coordsList[i]);
-    }
-    map.fitBounds(bounds);
-  }
-
-  function setupListeners(){
-    //MapMouseClick
-    map.addListener('click', function(event) {
-      setMyLocation({ lat: event.latLng.lat(), lng: event.latLng.lng() });
-    });
-
-    //SubmitLocationClicked
-    $("#localization-button").click(function(){
-        var coords = {lat: parseFloat($("#latLoc").val()), lng: parseFloat($("#lenLoc").val())};
-        setMyLocation(coords);
-    });
-	
-  } 
-
-	function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
-      var R = 6371; // Radius of the earth in km
-      var dLat = deg2rad(lat2-lat1);  // deg2rad below
-      var dLon = deg2rad(lon2-lon1); 
-      var a = 
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-        Math.sin(dLon/2) * Math.sin(dLon/2)
-        ; 
-      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-      var d = R * c; // Distance in km
-      //alert(d);
-      return d;
-    }
-
-    function deg2rad(deg) {
-      return deg * (Math.PI/180);
-    }
-
-    function getListOfclosestNodes(list, coords, length) {
-      var result = [];
-
-      for (i = 0; i < list.length; i++) {
-        if (getDistanceFromLatLonInKm(list[i].lat, list[i].lng, coords.lat, coords.lng) <= length) {
-          result.push(list[i]);
+        function updateView(coords) {
+            clearMarkers();
+            map.setCenter(coords);
+            var closestVillages = getListOfclosestNodes(villages, coords, radius);
+            $("#tabelaWiosek").html("<tr><td>Nazwa miejscowości</td><td>Odległość</td><td>Liczba mieszkańców</td></tr>");
+            for (var i = 0; i < closestVillages.length; ++i) {
+                addRow(closestVillages[i]);
+            }
+            setMarkers(closestVillages, icons.village.icon);
+            closestVillages.push(coords);
+            fitBounds(closestVillages);
+            $("#latLoc").val(coords.lat);
+            $("#lenLoc").val(coords.lng);
         }
-      }
 
-      return result;
-    }
+        function fitBounds(coordsList) {
+            var bounds = new google.maps.LatLngBounds();
+            for (var i = 0; i < coordsList.length; i++) {
+                bounds.extend(coordsList[i]);
+            }
+            map.fitBounds(bounds);
+        }
 
+        function setupListeners() {
+            //MapMouseClick
+            map.addListener('click', function (event) {
+                setMyLocation({
+                    lat: event.latLng.lat()
+                    , lng: event.latLng.lng()
+                });
+            });
+            //SubmitLocationClicked
+            $("#localization-button").click(function () {
+                var coords = {
+                    lat: parseFloat($("#latLoc").val())
+                    , lng: parseFloat($("#lenLoc").val())
+                };
+                setMyLocation(coords);
+            });
+        }
+
+        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+            var R = 6371; // Radius of the earth in km
+            var dLat = deg2rad(lat2 - lat1); // deg2rad below
+            var dLon = deg2rad(lon2 - lon1);
+            var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            var d = R * c; // Distance in km
+            //alert(d);
+            return d;
+        }
+
+        function deg2rad(deg) {
+            return deg * (Math.PI / 180);
+        }
+
+        function getListOfclosestNodes(list, coords, length) {
+            var result = [];
+            for (i = 0; i < list.length; i++) {
+                if (getDistanceFromLatLonInKm(list[i].lat, list[i].lng, coords.lat, coords.lng) <= length) {
+                    result.push(list[i]);
+                }
+            }
+            return result;
+        }
+    });
 </script>
-<script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBwbsD_1fcone450PTkpMAy_u40_CVcGms&callback=initMap">
-</script>
-</body>
+
 </html>
