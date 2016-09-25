@@ -43,9 +43,8 @@
  var map;
   var myLocationMarker = undefined;
   var communicationNodes = [{lat: 52.2, lng: 21.1}, {lat: 52.15, lng: 21.2}];
-	var addresses = ["MAŁOPOLSKIE nowotarski Rabka-Zdrój Rabka-Zdrój 1", 
+	var addresses = ["MAŁOPOLSKIE nowotarski Rabka-Zdrój (gmina miejsko-wiejska) Rabka-Zdrój 1", 
 					"WIELKOPOLSKIE wolsztyński Siedlec Wąchabno 1"];
-
 
   var iconPathBase = "img/";
   var icons = {
@@ -83,12 +82,13 @@ function doIt() {
     });
 	for (var i = 0; i < addresses.length; i++){
 		alert(addresses[i]);
-		var current = getCoordsByAddress(addresses[i]);
+		getCoordsByAddress(addresses[i], function(coords) {
+			if (coords == undefined) {
+				alert("ups...");
+			}
+			setMarker(coords, icons.radiotower.icon);	
+		});
 		
-		if (current == undefined) {
-			alert("ups...");
-		}
-		setMarker(current, icons.radiotower.icon);
 	}
     setupListeners();
     setMyLocation(getInitialCoords());
@@ -114,19 +114,15 @@ function doIt() {
     updateView(coords);
   }
 
-	function getCoordsByAddress(address) {
+	function getCoordsByAddress(address, callback) {
 		var geocoder = new google.maps.Geocoder();
 		geocoder.geocode( { 'address': address}, function(results, status) {
-	      var result = null;
 	      if (status == 'OK') {
-	        result = results[0].geometry.location;
-	        alert("1" + result);
+	        callback(results[0].geometry.location);
 	      } else {
 	      	alert(":(");
 	      }
 	    });
-	    alert("2" + self.result);
-	    return result;
 	}
 
   function setupListeners(){
@@ -155,14 +151,16 @@ function doIt() {
     var marker, i;
 
     for (i = 0; i < addresses.length; i++) {
-    	var current = getCoordsByAddress(addresses[i]);
-    	alert(addresses[i]);
-    	if (current == undefined) {
-    		alert("ehm...");
-    	}
-      marker = new google.maps.Marker({
-        position: current,
-        map: map
+    	getCoordsByAddress(addresses[i], function(coords) {
+    		
+	    	alert(addresses[i]);
+	    	if (coords === undefined) {
+	    		alert("ehm...");
+	    	}
+	      marker = new google.maps.Marker({
+	        position: coords,
+	        map: map
+	      });
       });
 
       google.maps.event.addListener(marker, 'click', (function(marker, i) {
