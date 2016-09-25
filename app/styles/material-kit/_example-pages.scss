@@ -116,6 +116,38 @@ h2.title{
     }
 }
 
+.vendor-page{
+    .wrapper > .header{
+        //height: 90vh;
+    }
+    .brand{
+        margin-top: 30vh;
+        color: #FFFFFF;
+        text-align: center;
+
+        h1{
+            font-size: 4.8em;
+            font-weight: 600;
+        }
+        h3{
+            font-size: 1.5em;
+            text-transform: uppercase;
+            max-width: 400px;
+            margin: 10px auto 0;
+        }
+    }
+    .section-basic{
+        padding-top: 15px;
+    }
+    .header-filter:after{
+        background: rgba(73,155,234, 0.64);
+        background: linear-gradient(45deg,  rgba(73,155,234,0.88) 0%, rgba(49,137,231, 0.45) 100%);
+        background: -moz-linear-gradient(135deg, rgba(73,155,234,0.88) 0%, rgba(49,137,231, 0.45) 100%);
+        background: -webkit-linear-gradient(135deg, rgba(73,155,234,0.88) 0%, rgba(49,137,231, 0.45) 100%);
+
+    }
+}
+
 // style for the landing page
 .landing-page{
 
