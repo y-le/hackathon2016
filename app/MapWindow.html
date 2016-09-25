@@ -59,6 +59,9 @@
   var communicationNodes = [{lat: 52.2, lng: 21.1}, {lat: 52.15, lng: 21.2}];
   var villages = [{name: "Abc", dystansDoNas: 0, liczbaMieszkancow: 200, obszar: 2.23, lat: 54.21145178746455, lng: 22.055740356445312}];
   var radius = 10;
+  var wlasciciele = ['Orion', 'JakuBas', 'TaniInternet', 'Wlaczek'];
+  var lacza = [ 'światłowód', 'miedź'];
+  var wioska;
 
   var iconPathBase = "img/";
   var icons = {
@@ -84,13 +87,13 @@
   }
   
   function nodeClicked(node){
-	console.log("ASD"); // przekierowac do stornki z 3 wyborami
+	window.location.replace("to_buy.html");
   }
   
   var rowId2 = 0;
   function addRow2(node){
-	$("#tabelaNodow").append('<tr id=\"a' + rowId2 + '\"' + '><td>' + node.name + '</td><td>' + node.dystansDoNas + '</td><td>' + node.szybkosc + '</td></input><td style=\"display:none\">' + node.lat + '</td><td style=\"display:none\">' + node.lng + '</td></tr>');
-	$("#" + rowId2 ).click(function() { nodeClicked(this); });
+	$("#tabelaNodow").append('<tr id=\"a' + rowId2 + '\"' + '><td>' + wlasciciele[Math.floor((Math.random() * 10)) % 4] + '</td><td>' + getDistanceFromLatLonInKm(wioska.lat, wioska.lng, node.lat, node.lng) + '</td><td>' + lacza[Math.floor((Math.random() * 10)) % 2] + '</td></input><td style=\"display:none\">' + node.lat + '</td><td style=\"display:none\">' + node.lng + '</td></tr>');
+	$("#a" + rowId2 ).click(function() { nodeClicked(this); });
 	var colorCopy = $("#a" + rowId2).css('backgroundColor');
 	//TODO: zmienic na ladny kolor 
 	$("#a" + rowId2).hover(function() {$(this).css({background:'lightblue'}); });
@@ -100,11 +103,13 @@
 	
   function villageClicked(row) {
 	clearMarkers();
+	$("#tabelaNodow").html("<tr><td>Nazwa właściciela</td><td>Odległość od miejscowości</td><td>Szybkość łącza</td></tr>");
 	listOfChildren = $(row).children();
 	len = listOfChildren.length;
 	
 	vilCoords = {lat: parseFloat($(listOfChildren[len - 2]).html()),
-				lng: parseFloat($(listOfChildren[len - 1]).html())}
+				lng: parseFloat($(listOfChildren[len - 1]).html())};
+	wioska = vilCoords;
 				
 	setMarker(vilCoords, icons.village.icon);
 	
@@ -122,7 +127,7 @@
 	
 	// dodac dobre baze nodow
 	for (var i = 0; i < sliced.length; ++i){
-		addRow2({name:'nazwa', dystansDoNas:123, szybkosc:321, lat:1, lng:2});
+		addRow2({name:'nazwa', dystansDoNas:123, szybkosc:321, lat:sliced[i].lat, lng:sliced[i].lng});
 	}
 	setMarkers(sliced, icons.radiotower.icon);
     sliced.push(vilCoords);
