@@ -276,6 +276,16 @@
 	
 	sliced = closestNodes.slice(0, range);
 	
+	sliced2 = [];
+	
+	for (var i = 0; i < sliced.length; ++i)
+	{
+		if (getDistanceFromLatLonInKm(vilCoords.lat, vilCoords.lng, sliced[i].lat, sliced[i].lng) >= 2.0){
+			sliced2.push(sliced[i]);
+		}
+	}
+	sliced = sliced2;
+	
 	// dodac dobre baze nodow
 	for (var i = 0; i < sliced.length; ++i){
 		addRow2({name:'nazwa', dystansDoNas:123, szybkosc:321, lat:sliced[i].lat, lng:sliced[i].lng});
