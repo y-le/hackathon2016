@@ -26,24 +26,26 @@ def wspolrzedne_key(row):
 
 subres = []
 import editdistance
-for x in lacznik:
-    x_teryt, x_simc, x_name = x['teryt'], x['simc'], x['name'].lower()
-    def join1():
+
+def join1():
+    for x in lacznik:
+        x_teryt, x_simc = x['teryt'], x['simc']
         for p in ludnosc:
-            p_teryt, p_simc = ludnosc_key(p):
+            p_teryt, p_simc = ludnosc_key(p)
             if x_teryt == p_teryt[:4] and x_simc == p_simc:
                 # SIMC jest pewnikiem
-                r = p.clone()
-                r.update(x)
-                yield r
-    res += join1()
+                p.update(x)
+                yield p
 
-for x in res:
-    def join2():
+def join2():
+    for x in join1():
+        x_teryt, x_name = x['teryt'], x['name'].lower()
         for q in wspolrzedne:
             q_teryt, q_name = wspolrzedne_key(q)
-            if x_teryt == q_teryt:
-                # TERYT jest pewnikiem
-                for p in _ludnosc:
-                    if editdistance.eval(x_name, q_name.lower()) <= 3 or editdistance.eval(p_name.lower(), q_name.lower()) <= 3:
-                        p | q
+            if x_name == q_name.lower():
+                r = q.clone()
+                r.update(x)
+                q.update(r)
+                yield q
+
+open('BAZA.json', 'w', encoding='utf-8').write(json.dumps(list(join2())))
