@@ -34,18 +34,18 @@ def join1():
             p_teryt, p_simc = ludnosc_key(p)
             if x_teryt == p_teryt[:4] and x_simc == p_simc:
                 # SIMC jest pewnikiem
-                r = p.clone()
-                r.update(x)
-                yield r
+                p.update(x)
+                yield p
 
 def join2():
     for x in join1():
-        x_teryt, x_name = x['teryt'], x['name']
+        x_teryt, x_name = x['teryt'], x['name'].lower()
         for q in wspolrzedne:
             q_teryt, q_name = wspolrzedne_key(q)
-            if editdistance.eval(x_name, q_name.lower()) <= 3:
+            if x_name == q_name.lower():
                 r = q.clone()
                 r.update(x)
-                yield r
+                q.update(r)
+                yield q
 
 open('BAZA.json', 'w', encoding='utf-8').write(json.dumps(list(join2())))
