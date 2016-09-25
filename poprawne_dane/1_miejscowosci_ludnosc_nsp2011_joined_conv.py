@@ -25,11 +25,11 @@ with open(csvfile, newline='', encoding='utf-8') as raw:
         assert valid_simc(row['teryt_simc'])
         row['simc'] = row['teryt_simc']
         row['teryt'] = teryt
-        row['teryt_simc'] = None
+        del row['teryt_simc']
         ls.append(row)
 
 import json
-jsonfile = csvfile[:-4] + '.json'
+jsonfile = 'LUDNOSC.json'
 open(jsonfile, 'w', encoding='utf-8').write(json.dumps(ls))
 
 # --- analiza
