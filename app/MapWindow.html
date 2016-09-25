@@ -57,7 +57,7 @@
   var myLocationMarker = undefined;
   var markers = [];
   var communicationNodes = [{lat: 52.2, lng: 21.1}, {lat: 52.15, lng: 21.2}];
-  var villages = [{name: "Abc", dystansDoNas: 0, liczbaMieszkancow: 200, obszar: 2.23, lat: 54.21145178746455, lng: 22.055740356445312}]
+  var villages = [{name: "Abc", dystansDoNas: 0, liczbaMieszkancow: 200, obszar: 2.23, lat: 54.21145178746455, lng: 22.055740356445312}];
   var radius = 10;
 
   var iconPathBase = "img/";
@@ -74,7 +74,7 @@
   
   var rowId = 0;
   function addRow(village){
-	$("#tabelaWiosek").append('<tr id=\"' + rowId + '\"' + '><td>' + village.name + '</td><td>' + village.dystansDoNas + '</td><td>' + village.obszar + '</td></input><td style=\"display:none\">' + village.lat + '</td><td style=\"display:none\">' + village.lng + '</td></tr>');
+	$("#tabelaWiosek").append('<tr id=\"' + rowId + '\"' + '><td>' + village.name2 + '</td><td>' + "dystans do nas..." + '</td><td>' + "obszar xD" + '</td></input><td style=\"display:none\">' + village.lat + '</td><td style=\"display:none\">' + village.lng + '</td></tr>');
 	$("#" + rowId ).click(function() { villageClicked(this); });
 	var colorCopy = $("#" + rowId).css('backgroundColor');
 	//TODO: zmienic na ladny kolor 
@@ -129,15 +129,29 @@
       zoom: 6,
       center: getInitialCoords()
     });
-	console.log(communicationNodes.length);
+	
+	//console.log(communicationNodes.length);
 	$.getJSON("points.json", function(json) {	
+	console.log("jestem");
     communicationNodes = json; // this will show the info it in firebug console
 	console.log(communicationNodes.length);
 	
-	$(".rowek").click(function() { console.log("asd");});
+	//$(".rowek").click(function() { console.log("asd");});
 });
 	
-    setupListeners();
+
+	
+	//console.log(communicationNodes.length);
+	$.getJSON("3tys_wiosek.json", function(json) {	
+	console.log("jestem2");
+    villages = json; // this will show the info it in firebug console
+	console.log(villages.length);
+	
+	//$(".rowek").click(function() { console.log("asd");});
+});
+	
+	
+	setupListeners();
   }
 
   function setMarker(coords, icon){
@@ -195,8 +209,8 @@
     fitBounds(closestVillages);
 
 	$("#tabelaWiosek").html("<tr><td>Nazwa miejscowości</td><td>Odległość</td><td>Liczba mieszkańców</td></tr>");
-	for (var i = 0; i < villages.length; ++i){
-		addRow(villages[i]);
+	for (var i = 0; i < closestVillages.length; ++i){
+		addRow(closestVillages[i]);
 	}
 
     $("#latLoc").val(coords.lat);
