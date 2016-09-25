@@ -92,9 +92,9 @@
                                     <!-- Table -->
                                     <table class="table" id="tabelaWiosek">
                                         <tr>
-                                            <td>Nazwa miejscowości</td>
-                                            <td>Odległość [km]</td>
-                                            <td>Liczba mieszkańców</td>
+                                            <td><b>Nazwa miejscowości</b></td>
+                                            <td><b>Odległość [km]</b></td>
+                                            <td><b>Liczba mieszkańców</b></td>
                                         </tr>
                                     </table>
                                 </div>
@@ -108,9 +108,9 @@
                                 <!-- Table -->
                                 <table class="table" id="tabelaNodow">
                                     <tr>
-                                        <td>Nazwa właściciela</td>
-                                        <td>Odległość od miejscowości</td>
-                                        <td>Szybkość łącza</td>
+                                        <td><b>Nazwa właściciela</b></td>
+                                        <td><b>Odległość od miejscowości</b></td>
+                                        <td><b>Szybkość łącza</b></td>
                                     </tr>
                                 </table>
                             </div>
@@ -256,7 +256,7 @@
 	
   function villageClicked(row) {
 	clearMarkers();
-	$("#tabelaNodow").html("<tr><td>Nazwa właściciela</td><td>Odległość od miejscowości</td><td>Szybkość łącza</td></tr>");
+	$("#tabelaNodow").html("<td><b>Nazwa właściciela</b></td><td><b>Odległość od miejscowości</b></td><td><b>Szybkość łącza</b></td>");
 	listOfChildren = $(row).children();
 	len = listOfChildren.length;
 	
@@ -310,7 +310,7 @@
 	console.log("jestem2");
     villages = json; // this will show the info it in firebug console
 	villages2 = []
-	for (var i = 0; i < villages.length; ++i){
+	for (var i = 0; i < villages.length; i += 3){
 	 villages2.push({populacja: parseInt(villages[i].populacja),
 		glowna: villages[i].glowna, 
 		lat: parseFloat(villages[i].lat),
@@ -375,7 +375,7 @@
     map.setCenter(coords);
 
     var closestVillages = getListOfclosestNodes(villages, coords, radius);
-	$("#tabelaWiosek").html("<tr><td>Nazwa miejscowości</td><td>Odległość</td><td>Liczba mieszkańców</td></tr>");
+	$("#tabelaWiosek").html("<td><b>Nazwa miejscowości</b></td><td><b>Odległość [km]</b></td><td><b>Liczba mieszkańców</b></td>");
 	for (var i = 0; i < closestVillages.length; ++i){
 		addRow(closestVillages[i]);
 	}
