@@ -16,7 +16,7 @@
 </head>
 <body>
 <div id="wrapper">
-<h3>My Google Maps Demo</h3>
+<h3>Analiza kosztu podłączenia miejscowości do łącza</h3>
 <div id="sidebar-wrapper">
 	<div id="coords"><label for="usr">Twoja lokalizacja:</label><br/>
         <label for="latLoc">Szerokość</label>
@@ -74,15 +74,30 @@
   function getInitialCoords() {
     return {lat: 54.21145178746455, lng: 22.055740356445312};
   }
-  
+
+  var i = 0;
+  var jumped1;
+  var jumped2;
   var rowId = 0;
   function addRow(village){
-	$("#tabelaWiosek").append('<tr id=\"' + rowId + '\"' + '><td>' + village.glowna + '</td><td>' + getDistanceFromLatLonInKm(village.lat, village.lng, myLocationMarker.getPosition().lat(), myLocationMarker.getPosition().lng()).toFixed(1) + '</td><td>' + village.populacja + '</td></input><td style=\"display:none\">' + parseFloat(village.lat) + '</td><td style=\"display:none\">' + parseFloat(village.lng) + '</td></tr>');
+	$("#tabelaWiosek").append('<tr id=\"' + rowId + '\"' + '><td>' + village.glowna + '</td><td>' + getDistanceFromLatLonInKm(village.lat, village.lng, myLocationMarker.getPosition().lat(), myLocationMarker.getPosition().lng()).toFixed(1) + '</td><td>' + Math.floor(village.populacja / ((Math.random() * 10) % 12 + 4)) + '</td></input><td style=\"display:none\">' + parseFloat(village.lat) + '</td><td style=\"display:none\">' + parseFloat(village.lng) + '</td></tr>');
 	$("#" + rowId ).click(function() { villageClicked(this); });
 	var colorCopy = $("#" + rowId).css('backgroundColor');
 	//TODO: zmienic na ladny kolor 
-	$("#" + rowId).hover(function() {$(this).css({background:'lightblue'}); });
-	$("#" + rowId).mouseleave(function() {$(this).css({background:colorCopy}); });
+	$("#" + rowId).mouseenter(function() {
+		$(this).css({background:'lightblue'}); 
+		var x = new google.maps.Marker({
+		  position: {lat:village.lat, lng:village.lng},
+		  map: map,
+		  icon: icons.village.icon,
+		  animation: google.maps.Animation.DROP
+		});
+		jumped1 = x;
+		});
+	$("#" + rowId).mouseleave(function() {
+		$(this).css({background:colorCopy});
+		jumped1.setMap(null);
+		});
 	rowId = rowId + 1;
   }
   
@@ -96,8 +111,19 @@
 	$("#a" + rowId2 ).click(function() { nodeClicked(this); });
 	var colorCopy = $("#a" + rowId2).css('backgroundColor');
 	//TODO: zmienic na ladny kolor 
-	$("#a" + rowId2).hover(function() {$(this).css({background:'lightblue'}); });
-	$("#a" + rowId2).mouseleave(function() {$(this).css({background:colorCopy}); });
+	$("#a" + rowId2).mouseenter(function() {
+		$(this).css({background:'lightblue'});
+		var x2 = new google.maps.Marker({
+		  position: {lat:node.lat, lng:node.lng},
+		  map: map,
+		  icon: icons.radiotower.icon,
+		  animation: google.maps.Animation.DROP
+		});
+		jumped2 = x2;
+		});
+	$("#a" + rowId2).mouseleave(function() {
+	$(this).css({background:colorCopy});
+		jumped2.setMap(null);});
 	rowId2 = rowId2 + 1;
   }
 	
