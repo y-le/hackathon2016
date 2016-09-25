@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/simple-sidebar.css" rel="stylesheet">
+  <style>
+    #map {
+      height: 400px;
+      width: 100%;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+</head>
+<body>
+<div class="container">
+	<h3>Dla klienta...</h3>
+	<div class="row">
+		<div class="col-md-4">
+			<form id="form1">
+			  Imie:<br>
+			  <input type="text" id="Imie"><br>
+			  Nazwisko:<br>
+			  <input type="text" id="Nazwisko"><br>
+			  Email:<br>
+			  <input type="text" id="Email"><br>
+			  Telefon:<br>
+			  <input type="text" id="Telefon"><br>
+			  Uwagi:<br>
+			  <input type="text" id="Uwagi" id="asd" placeholder="Uwagi klienta"><br>
+			</form> 
+			<button value="Submit" onclick="doIt()">Oznacz</button>
+		</div>
+		<div class="col-md-8">
+			<div id="map"></div>
+		</div>
+	</div>
+</div>
+
+<script>
+
+  var map;
+  var myLocationMarker = undefined;
+  var markers = [];
+  var skargi;
+  var communicationNodes = [{lat: 52.2, lng: 21.1}, {lat: 52.15, lng: 21.2}];
+  var villages = [{name: "Abc", dystansDoNas: 0, liczbaMieszkancow: 200, obszar: 2.23, lat: 54.21145178746455, lng: 22.055740356445312}];
+  var radius = 10;
+
+  var iconPathBase = "img/";
+  var icons = {
+      radiotower: {
+        icon: iconPathBase + 'radiotower.png'},
+	  village: {
+	    icon: iconPathBase + 'questionMark.png' }
+    };
+
+  function getInitialCoords() {
+    return {lat: 54.21145178746455, lng: 22.055740356445312};
+  }
+
+	function doIt() {
+		window.location.replace("index.html");
+	}
+
+  var rowId = 0;
+  function addRow(village){
+	$("#tabelaWiosek").append('<tr id=\"' + rowId + '\"' + '><td>' + village.glowna + '</td><td>' + getDistanceFromLatLonInKm(village.lat, village.lng, myLocationMarker.getPosition().lat(), myLocationMarker.getPosition().lng()).toFixed(1) + '</td><td>' + village.populacja + '</td></input><td style=\"display:none\">' + parseFloat(village.lat) + '</td><td style=\"display:none\">' + parseFloat(village.lng) + '</td></tr>');
+	$("#" + rowId ).click(function() { villageClicked(this); });
+	var colorCopy = $("#" + rowId).css('backgroundColor');
+	//TODO: zmienic na ladny kolor 
+	$("#" + rowId).hover(function() {$(this).css({background:'lightblue'}); });
+	$("#" + rowId).mouseleave(function() {$(this).css({background:colorCopy}); });
+	rowId = rowId + 1;
+  }
+  
+  function nodeClicked(node){
+	console.log("ASD"); // przekierowac do stornki z 3 wyborami
+  }
+  
+  var rowId2 = 0;
+  function addRow2(node){
+	$("#tabelaNodow").append('<tr id=\"a' + rowId2 + '\"' + '><td>' + node.name + '</td><td>' + node.dystansDoNas + '</td><td>' + node.szybkosc + '</td></input><td style=\"display:none\">' + node.lat + '</td><td style=\"display:none\">' + node.lng + '</td></tr>');
+	$("#" + rowId2 ).click(function() { nodeClicked(this); });
+	var colorCopy = $("#a" + rowId2).css('backgroundColor');
+	//TODO: zmienic na ladny kolor 
+	$("#a" + rowId2).hover(function() {$(this).css({background:'lightblue'}); });
+	$("#a" + rowId2).mouseleave(function() {$(this).css({background:colorCopy}); });
+	rowId2 = rowId2 + 1;
+  }
+	
+  function villageClicked(row) {
+	clearMarkers();
+	listOfChildren = $(row).children();
+	len = listOfChildren.length;
+	
+	vilCoords = {lat: parseFloat($(listOfChildren[len - 2]).html()),
+				lng: parseFloat($(listOfChildren[len - 1]).html())}
+				
+	setMarker(vilCoords, icons.village.icon);
+	
+	var closestNodes = getListOfclosestNodes(communicationNodes, vilCoords, radius);
+	closestNodes.sort(function(a, b){ getDistanceFromLatLonInKm(a.lat, a.lng, vilCoords.lat, vilCoords.lng) <
+										getDistanceFromLatLonInKm(b.lat, b.lng, vilCoords.lat, vilCoords.lng)});
+										
+	range = 5;
+	if (range > closestNodes.length){
+		range = closestNodes.length;
+	}
+	
+	
+	sliced = closestNodes.slice(0, range);
+	
+	// dodac dobre baze nodow
+	for (var i = 0; i < sliced.length; ++i){
+		addRow2({name:'nazwa', dystansDoNas:123, szybkosc:321, lat:1, lng:2});
+	}
+	setMarkers(sliced, icons.radiotower.icon);
+    sliced.push(vilCoords);
+	sliced.push({lat:myLocationMarker.getPosition().lat(), lng:myLocationMarker.getPosition().lng() });
+    fitBounds(sliced);
+  }
+  
+
+  function initMap() {
+    map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 6,
+      center: getInitialCoords()
+    });
+	
+	//console.log(communicationNodes.length);
+	$.getJSON("points.json", function(json) {	
+	console.log("jestem");
+    communicationNodes = json; // this will show the info it in firebug console
+	console.log(communicationNodes.length);
+	
+	//$(".rowek").click(function() { console.log("asd");});
+});
+$.getJSON("skargi.json", function(json) {	
+	console.log("jestem");
+    skargi = json; // this will show the info it in firebug console
+	console.log(communicationNodes.length);
+	
+	//$(".rowek").click(function() { console.log("asd");});
+});
+	
+
+	
+	//console.log(communicationNodes.length);
+	$.getJSON("wynik.json", function(json) {	
+	console.log("jestem2");
+    villages = json; // this will show the info it in firebug console
+	villages2 = []
+	for (var i = 0; i < villages.length; ++i){
+	 villages2.push({populacja: parseInt(villages[i].populacja),
+		glowna: villages[i].glowna, 
+		lat: parseFloat(villages[i].lat),
+		lng: parseFloat(villages[i].lng)});
+	}
+	villages = villages2;
+	console.log(villages.length);
+	
+	//$(".rowek").click(function() { console.log("asd");});
+});
+	
+	
+	setupListeners();
+  }
+  
+  var counter = 0;
+
+  function setMarker(coords, icon){
+    //alert(coords.lat + " " + coords.lng);
+    
+     var s = ["Brak możliwości podłączenia przewodowego internetu oraz bardzo słaby zasięg internetu w technologii CDMA, bardzo słaby zasięg telefonii komórkowej GSM wszystkich operatorów, nie stać mnie na internet w technologii satelitarnej. Proszę o wspieranie lokalnych władz w rozszerzaniu nadajników CDMA, czekamy na decyzje.",
+  "Bardzo słaby internet...",
+  "Otrzymałem odpowiedź że wszystko jest w porzšdku a sygnał jest bardzo słaby a prędkość przesyłu danych oscyluje w granicy 2 Mb/s a sygnał LTE nie występuje",
+  "Brak wolnego przyłącza do centralki",
+  "Bardzo słaby sygnał dla Sieci komórkowej i Internetu Mobilnego. Najblizsze BTS w odległości ok. 6km",
+  "Internet kablowy nieopłacalny. Zebrałem 18 osób (najbliżsi sąsiedzi), które były zainteresowane usługami radiowymi",
+  "Internet od operatora bardzo słaby, szukamy radiowego...",
+  "Internet zbyt wolny",
+  "Szukamy alternatywy...",
+  "Obiecali ze od trzech lat zalozą i nadal nic :\()"];
+  
+  
+    var desc = s[counter%10];
+    
+    counter++; 
+        
+    var contentString = desc;
+
+        var infowindow = new google.maps.InfoWindow({
+          content: contentString
+        });
+
+
+    var marker = new google.maps.Marker({
+      position: coords,
+      map: map,
+      icon: icon
+    });
+    
+        marker.addListener('click', function() {
+          infowindow.open(map, marker);
+        });
+
+
+    markers.push(marker);
+
+    return marker;
+  }
+
+  function setMarkers(listOfCoords, icon){
+    for (var i = 0; i < listOfCoords.length; i++) {
+        setMarker(listOfCoords[i], icon);
+    }
+  }
+
+  function clearMarkers(){
+    for (var i = 0; i < markers.length; i++){
+        if (markers[i] !== myLocationMarker){
+            markers[i].setMap(null);
+        }
+    }
+  }
+
+  function setMyLocation(coords){
+    if (myLocationMarker !== undefined){
+        myLocationMarker.setMap(null);
+    }
+    //alert(coords.lat);
+    myLocationMarker = setMarker(coords);
+    
+    updateView(coords);
+  }
+  
+  /*var closestNodes = getListOfclosestNodes(communicationNodes, coords, radius);
+	
+    setMarkers(closestNodes, icons.radiotower.icon);
+    closestNodes.push(coords);
+    fitBounds(closestNodes);*/
+
+  function updateView(coords){
+   
+    clearMarkers();
+    map.setCenter(coords);
+
+    var closestVillages = getListOfclosestNodes(skargi, coords, radius);
+	$("#tabelaWiosek").html("<tr><td>Nazwa miejscowości</td><td>Odległość</td><td>Liczba mieszkańców</td></tr>");
+	for (var i = 0; i < closestVillages.length; ++i){
+		addRow(closestVillages[i]);
+	}
+    setMarkers(closestVillages, icons.village.icon);
+    closestVillages.push(coords);
+    fitBounds(closestVillages);
+
+	
+
+    $("#latLoc").val(coords.lat);
+    $("#lenLoc").val(coords.lng);
+
+  }
+
+  function fitBounds(coordsList){
+    var bounds = new google.maps.LatLngBounds();
+
+    for (var i = 0; i < coordsList.length; i++) {
+        bounds.extend(coordsList[i]);
+    }
+    map.fitBounds(bounds);
+  }
+
+  function setupListeners(){
+    //MapMouseClick
+    map.addListener('click', function(event) {
+      setMyLocation({ lat: event.latLng.lat(), lng: event.latLng.lng() });
+    });
+
+    //SubmitLocationClicked
+    $("#localization-button").click(function(){
+        var coords = {lat: parseFloat($("#latLoc").val()), lng: parseFloat($("#lenLoc").val())};
+        setMyLocation(coords);
+    });
+	
+  } 
+
+	function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+      var R = 6371; // Radius of the earth in km
+      var dLat = deg2rad(lat2-lat1);  // deg2rad below
+      var dLon = deg2rad(lon2-lon1); 
+      var a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2)
+        ; 
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+      var d = R * c; // Distance in km
+      //alert(d);
+      return d;
+    }
+
+    function deg2rad(deg) {
+      return deg * (Math.PI/180);
+    }
+
+    function getListOfclosestNodes(list, coords, length) {
+      var result = [];
+
+      for (i = 0; i < list.length; i++) {
+        if (getDistanceFromLatLonInKm(list[i].lat, list[i].lng, coords.lat, coords.lng) <= length) {
+          result.push(list[i]);
+        }
+      }
+
+      return result;
+    }
+
+</script>
+
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBwbsD_1fcone450PTkpMAy_u40_CVcGms&callback=initMap">
+</script>
+</body>
+</html>
