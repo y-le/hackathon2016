@@ -40,6 +40,18 @@
 </div>
 
 <script>
+
+  var iconPathBase = "img/";
+  var icons = {
+      radiotower: {
+        icon: iconPathBase + 'radiotower.png'},
+	  questionMark: {
+	    icon: iconPathBase + 'questionMark.png' }
+    };
+
+var markers;
+var radius = 10;
+var maxSkargi = 100;
  var map;
   var myLocationMarker = undefined;
   var communicationNodes = [{lat: 52.2, lng: 21.1}, {lat: 52.15, lng: 21.2}];
@@ -61,37 +73,28 @@ function doIt() {
 	var lat = myLocationMarker.getPosition().lat();
 	var lng = myLocationMarker.getPosition().lng();
 	
-	alert(name + "\n" + 
-	surname + "\n" + 
-	email + "\n" + 
-	phone + "\n" + 
-	observations + "\n" + 
-	lat + "\n" + 
-	lng);
-	
 }
 
   function getInitialCoords() {
     return {lat: 52.14, lng: 21.1};
   }
+  
+  var skargi = undefined;
 
   function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
       zoom: 6,
       center: getInitialCoords()
     });
-	for (var i = 0; i < addresses.length; i++){
-		alert(addresses[i]);
-		getCoordsByAddress(addresses[i], function(coords) {
-			if (coords == undefined) {
-				alert("ups...");
-			}
-			setMarker(coords, icons.radiotower.icon);	
-		});
-		
-	}
     setupListeners();
     setMyLocation(getInitialCoords());
+    
+    $.getJSON("skargi.json", function(json) {	
+    	skargi = json; // this will show the info it in firebug console
+	});
+	
+	var closestNodes = getListOfclosestNodes(communicationNodes, vilCoords, radius);
+	
   }
 
   function setMarker(coords, icon){
@@ -100,10 +103,49 @@ function doIt() {
       map: map,
       icon: icon
     });
-
     return marker;
   }
+  
+  function clearMarkers(){
+    for (var i = 0; i < markers.length; i++){
+        if (markers[i] !== myLocationMarker){
+            markers[i].setMap(null);
+        }
+    }
+  }
 
+	function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+      var R = 6371; // Radius of the earth in km
+      var dLat = deg2rad(lat2-lat1);  // deg2rad below
+      var dLon = deg2rad(lon2-lon1); 
+      var a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2)
+        ; 
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+      var d = R * c; // Distance in km
+      //alert(d);
+      return d;
+    }
+
+    function deg2rad(deg) {
+      return deg * (Math.PI/180);
+    }
+
+    function getListOfclosestNodes(coords, length) {
+      var result = [];
+
+      for (i = 0; i < skargi.length; i++) {
+        if (getDistanceFromLatLonInKm(skargi[i].lat, skargi[i].lng, coords.lat, coords.lng) <= length) {
+          result.push(skargi[i]);
+        }
+      }
+
+      return result;
+    }
+
+  
   function setMyLocation(coords){
     if (myLocationMarker !== undefined){
         myLocationMarker.setMap(null);
@@ -129,6 +171,10 @@ function doIt() {
     //MapMouseClick
     map.addListener('click', function(event) {
       setMyLocation(event.latLng);
+		placeMarker(event.latLng);
+	  	clearMarkers();
+	  	
+	  	setMarkers(getListOfclosestNodes(myLocationMarker, radius), icons.questionMark.icon);
     });
 
     //SubmitLocationClicked
@@ -140,36 +186,29 @@ function doIt() {
 
 	google.maps.event.addListener(map, 'click', function(event) {
 	  	placeMarker(event.latLng);
+	  	clearMarkers();
+	  	
+	  	setMarkers(getListOfclosestNodes(myLocationMarker, radius), icons.questionMark.icon);
 	});
 	
+	  function setMarkers(listOfCoords, icon){
+	    for (var i = 0; i < listOfCoords.length; i++) {
+	        setMarker(listOfCoords[i], icon);
+	    }
+	  }
+
+
 	function placeMarker(location) {
+		if (myLocationMarker !== undefined) {
+			myLocationMarker.setMap(null);
+		}
+		
 	    myLocationMarker = new google.maps.Marker({
 	        position: location, 
 	        map: map
 	    });
 	}
-    var marker, i;
-
-    for (i = 0; i < addresses.length; i++) {
-    	getCoordsByAddress(addresses[i], function(coords) {
-    		
-	    	alert(addresses[i]);
-	    	if (coords === undefined) {
-	    		alert("ehm...");
-	    	}
-	      marker = new google.maps.Marker({
-	        position: coords,
-	        map: map
-	      });
-      });
-
-      google.maps.event.addListener(marker, 'click', (function(marker, i) {
-        return function() {
-          infowindow.setContent(locations[i][0]);
-          infowindow.open(map, marker);
-        }
-      })(marker, i));
-    }
+	
 </script>
 <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBwbsD_1fcone450PTkpMAy_u40_CVcGms&callback=initMap">
